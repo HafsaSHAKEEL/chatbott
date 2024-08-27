@@ -1,5 +1,3 @@
-Certainly! Here's the README content provided earlier, formatted correctly as a standalone Markdown document:
-
 ---
 
 # LlamaIndex + Pinecone Document Querying System
@@ -74,7 +72,7 @@ Output:
 ```plaintext
 LlamaIndex response with sources: The ownership of assets, as outlined in the Asset Handling Policy of INOVAQO, states that all assets and their properties are primarily owned by INOVAQO and are recorded in the Asset Register and books of accounts. While the company may hand over assets for use by its employees, those employees carry the responsibility of temporary ownership. The asset owner is responsible for ensuring that the asset and any associated data or information are classified and protected according to the Asset Handling Policy, as well as defining and periodically reviewing access controls, IT security, and compliance for electronic equipment.
 
-(Source: Asset Handling Policy - INOVAQO' 23.pdf)
+(Source: Asset Handling Policy)
 ```
 
 ## Optimization
@@ -105,5 +103,3 @@ Feel free to submit issues or pull requests to contribute to this project. Any e
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
 
 ---
-
-This Markdown document is ready to be used as a README file without embedding it in any YAML or scripting context. Simply place it in your project directory as `README.md`.
