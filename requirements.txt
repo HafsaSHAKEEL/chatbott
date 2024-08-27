@@ -1,0 +1,8 @@
+dotenv
+langchain
+langchain_g4f
+langchain_huggingface
+langchain_text_splitters
+pinecone-client
+pypdf
+llama_index
