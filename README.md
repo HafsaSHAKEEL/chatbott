@@ -1,5 +1,3 @@
----
-
 # LlamaIndex + Pinecone Document Querying System
 
 This project provides a streamlined pipeline to process, embed, and query PDF documents using LlamaIndex and Pinecone. The system is designed to load documents from a directory, create embeddings, and retrieve relevant information based on a user's query. The pipeline has been optimized for speed and accuracy using timing decorators.
@@ -101,5 +99,3 @@ Feel free to submit issues or pull requests to contribute to this project. Any e
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
-
----
