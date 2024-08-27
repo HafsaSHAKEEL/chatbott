@@ -1,7 +1,4 @@
-steps:
-  - name: Print README
-    run: |
-      cat << 'EOF' > README.md
+
       # LlamaIndex + Pinecone Document Querying System
 
       This project provides a streamlined pipeline to process, embed, and query PDF documents using LlamaIndex and Pinecone. The system is designed to load documents from a directory, create embeddings, and retrieve relevant information based on a user's query. The pipeline has been optimized for speed and accuracy using timing decorators.
