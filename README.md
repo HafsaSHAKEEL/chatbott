@@ -1,107 +1,109 @@
-steps:
-  - name: Print README
-    run: |
-      cat << 'EOF' > README.md
-      # LlamaIndex + Pinecone Document Querying System
+Certainly! Here's the README content provided earlier, formatted correctly as a standalone Markdown document:
 
-      This project provides a streamlined pipeline to process, embed, and query PDF documents using LlamaIndex and Pinecone. The system is designed to load documents from a directory, create embeddings, and retrieve relevant information based on a user's query. The pipeline has been optimized for speed and accuracy using timing decorators.
+---
 
-      ## Project Structure
+# LlamaIndex + Pinecone Document Querying System
 
-      ```
-      .
-      ├── embeddings/
-      │   ├── test.py            # Main script containing the LlamaIndex + Pinecone pipeline
-      ├── .env                   # Environment variables (API keys, etc.)
-      ├── pdf/                   # Directory containing PDF documents
-      ├── requirements.txt       # Python dependencies
-      └── README.md              # Project documentation
-      ```
+This project provides a streamlined pipeline to process, embed, and query PDF documents using LlamaIndex and Pinecone. The system is designed to load documents from a directory, create embeddings, and retrieve relevant information based on a user's query. The pipeline has been optimized for speed and accuracy using timing decorators.
 
-      ## Installation
+## Project Structure
 
-      ### 1. Clone the Repository
-      ```bash
-      git clone <repository_url>
-      cd <repository_directory>
-      ```
+```
+.
+├── embeddings/
+│   ├── test.py            # Main script containing the LlamaIndex + Pinecone pipeline
+├── .env                   # Environment variables (API keys, etc.)
+├── pdf/                   # Directory containing PDF documents
+├── requirements.txt       # Python dependencies
+└── README.md              # Project documentation
+```
 
-      ### 2. Create a Virtual Environment
-      ```bash
-      python3 -m venv .venv
-      source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
-      ```
+## Installation
 
-      ### 3. Install Dependencies
-      ```bash
-      pip install -r requirements.txt
-      ```
+### 1. Clone the Repository
+```bash
+git clone <repository_url>
+cd <repository_directory>
+```
 
-      ### 4. Set Up Environment Variables
-      Create a `.env` file in the root directory and add your API keys:
-      ```plaintext
-      HUGGINGFACE_API_KEY=your_huggingface_api_key
-      PINECONE_API_KEY=your_pinecone_api_key
-      PINECONE_ENVIRONMENT=your_pinecone_environment
-      ```
+### 2. Create a Virtual Environment
+```bash
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
+```
 
-      ### 5. Add Your PDF Documents
-      Place the PDF documents you want to process in the `pdf/` directory.
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-      ## Usage
+### 4. Set Up Environment Variables
+Create a `.env` file in the root directory and add your API keys:
+```plaintext
+HUGGINGFACE_API_KEY=your_huggingface_api_key
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_ENVIRONMENT=your_pinecone_environment
+```
 
-      ### 1. Running the Script
+### 5. Add Your PDF Documents
+Place the PDF documents you want to process in the `pdf/` directory.
 
-      To run the script and start querying documents, use:
-      ```bash
-      python embeddings/test.py
-      ```
+## Usage
 
-      ### 2. How It Works
+### 1. Running the Script
 
-      - **Loading Environment Variables**: The script loads API keys and other necessary environment settings from the `.env` file.
-      - **Loading and Splitting PDF Documents**: Documents from the `pdf/` directory are loaded and split into smaller chunks for efficient processing.
-      - **Embedding Documents**: The system uses the Hugging Face model to create embeddings, which are then stored in a Pinecone index.
-      - **Querying the Documents**: The user can input a question, and the system will retrieve the most relevant documents, process them with LlamaIndex, and return a concise answer with source references.
+To run the script and start querying documents, use:
+```bash
+python embeddings/test.py
+```
 
-      ### 3. Example Query
+### 2. How It Works
 
-      The following example demonstrates how to query the system:
-      ```bash
-      Question: "What are the ownership of assets?"
-      ```
-      Output:
-      ```plaintext
-      LlamaIndex response with sources: The ownership of assets, as outlined in the Asset Handling Policy of INOVAQO, states that all assets and their properties are primarily owned by INOVAQO and are recorded in the Asset Register and books of accounts. While the company may hand over assets for use by its employees, those employees carry the responsibility of temporary ownership. The asset owner is responsible for ensuring that the asset and any associated data or information are classified and protected according to the Asset Handling Policy, as well as defining and periodically reviewing access controls, IT security, and compliance for electronic equipment.
+- **Loading Environment Variables**: The script loads API keys and other necessary environment settings from the `.env` file.
+- **Loading and Splitting PDF Documents**: Documents from the `pdf/` directory are loaded and split into smaller chunks for efficient processing.
+- **Embedding Documents**: The system uses the Hugging Face model to create embeddings, which are then stored in a Pinecone index.
+- **Querying the Documents**: The user can input a question, and the system will retrieve the most relevant documents, process them with LlamaIndex, and return a concise answer with source references.
 
-      (Source: Asset Handling Policy - INOVAQO' 23.pdf)
-      ```
+### 3. Example Query
 
-      ## Optimization
+The following example demonstrates how to query the system:
+```plaintext
+Question: "What are the ownership of assets?"
+```
+Output:
+```plaintext
+LlamaIndex response with sources: The ownership of assets, as outlined in the Asset Handling Policy of INOVAQO, states that all assets and their properties are primarily owned by INOVAQO and are recorded in the Asset Register and books of accounts. While the company may hand over assets for use by its employees, those employees carry the responsibility of temporary ownership. The asset owner is responsible for ensuring that the asset and any associated data or information are classified and protected according to the Asset Handling Policy, as well as defining and periodically reviewing access controls, IT security, and compliance for electronic equipment.
 
-      - **Timing Decorators**: The functions are wrapped in a timing decorator to measure and optimize the execution time.
-      - **Single Source References**: The script ensures that each document source is referenced only once in the final output to avoid redundancy.
+(Source: Asset Handling Policy - INOVAQO' 23.pdf)
+```
 
-      ## Dependencies
+## Optimization
 
-      The project requires the following Python packages:
-      - `dotenv`
-      - `langchain`
-      - `langchain_g4f`
-      - `langchain_huggingface`
-      - `langchain_text_splitters`
-      - `pinecone-client`
-      - `pypdf`
-      - `llama_index`
+- **Timing Decorators**: The functions are wrapped in a timing decorator to measure and optimize the execution time.
+- **Single Source References**: The script ensures that each document source is referenced only once in the final output to avoid redundancy.
 
-      These dependencies are included in the `requirements.txt` file and can be installed using `pip`.
+## Dependencies
 
-      ## Contributing
+The project requires the following Python packages:
+- `dotenv`
+- `langchain`
+- `langchain_g4f`
+- `langchain_huggingface`
+- `langchain_text_splitters`
+- `pinecone-client`
+- `pypdf`
+- `llama_index`
 
-      Feel free to submit issues or pull requests to contribute to this project. Any enhancements, optimizations, or additional features are welcome!
+These dependencies are included in the `requirements.txt` file and can be installed using `pip`.
 
-      ## License
+## Contributing
 
-      This project is licensed under the MIT License. See the `LICENSE` file for more details.
+Feel free to submit issues or pull requests to contribute to this project. Any enhancements, optimizations, or additional features are welcome!
 
-      EOF
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for more details.
+
+---
+
+This Markdown document is ready to be used as a README file without embedding it in any YAML or scripting context. Simply place it in your project directory as `README.md`.
