@@ -1,6 +1,7 @@
 import os
 import re
 import warnings
+import time
 from dotenv import load_dotenv
 from langchain.chains.query_constructor.schema import AttributeInfo
 from langchain.retrievers import SelfQueryRetriever
@@ -9,17 +10,29 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pinecone import Pinecone, ServerlessSpec
 from pypdf import PdfReader
-from llama_index.legacy import SimpleDirectoryReader, ServiceContext, GPTVectorStoreIndex, set_global_service_context, \
-    Document
+from llama_index.legacy import SimpleDirectoryReader, ServiceContext, GPTVectorStoreIndex, set_global_service_context
+from langchain.schema import Document
 from langchain_pinecone import Pinecone as PC
 
 from g4f import models
 
 # Suppress specific warnings
-warnings.filterwarnings("ignore", category=FutureWarning, message=r'`clean_up_tokenization_spaces` was not set')
+warnings.filterwarnings("ignore", category=FutureWarning, message=r'clean_up_tokenization_spaces was not set')
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
+def timing_decorator(func):
+    """Decorator to time the execution of functions."""
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"Execution time for {func.__name__}: {end_time - start_time:.2f} seconds")
+        return result
+    return wrapper
+
+
+@timing_decorator
 def load_environment_variables():
     """
     Load environment variables from a .env file.
@@ -35,17 +48,22 @@ def load_environment_variables():
     }
 
 
+@timing_decorator
 def check_directory_exists(directory_path):
     """
-    Check if a directory exists; raise error if not.
+    Check if a directory exists; raise an error if not.
 
     Args:
         directory_path (str): Path to check.
+
+    Raises:
+        ValueError: If the directory does not exist.
     """
     if not os.path.exists(directory_path):
         raise ValueError(f"Directory {directory_path} does not exist.")
 
 
+@timing_decorator
 def preprocess_document(text):
     """
     Remove specific patterns from document text.
@@ -59,10 +77,10 @@ def preprocess_document(text):
     text = re.sub(r'P a g e \| \d+', '', text)
     text = re.sub(r'(Management reserves all the rights to change or eliminate any policy at any time)', '', text,
                   flags=re.IGNORECASE)
-    # Other similar cleaning operations...
     return text
 
 
+@timing_decorator
 def load_pdf(file_path):
     """
     Extract text from a PDF file.
@@ -71,13 +89,14 @@ def load_pdf(file_path):
         file_path (str): Path to the PDF file.
 
     Returns:
-        list: Document object containing extracted text.
+        list: Document objects containing extracted text.
     """
     reader = PdfReader(file_path)
     text = "".join(page.extract_text() for page in reader.pages)
     return [Document(page_content=text, metadata={"source": file_path})]
 
 
+@timing_decorator
 def load_documents_from_directory(pdf_directory):
     """
     Load and split documents from PDF files in a directory.
@@ -99,34 +118,10 @@ def load_documents_from_directory(pdf_directory):
     return documents
 
 
-def split_documents_into_chunks(documents, chunk_size=1000, chunk_overlap=200):
-    """
-    Split Document objects into smaller chunks.
-
-    Args:
-        documents (list): List of Document objects.
-
-    Returns:
-        list: List of chunked Document objects.
-        :param documents:
-        :param chunk_overlap:
-        :param chunk_size:
-    """
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    chunked_documents = []
-    for doc in documents:
-        chunks = text_splitter.split_text(doc.page_content)
-        chunked_documents.extend(
-            Document(page_content=chunk,
-                     metadata={'source': f"{doc.metadata.get('source', 'unknown_source')}_chunk_{i}"})
-            for i, chunk in enumerate(chunks)
-        )
-    return chunked_documents
-
-
+@timing_decorator
 def get_pinecone_db(index_name, embeddings, pdf_dir):
     """
-    Initialize or load a Pinecone index, and load documents into it.
+    Initialize or load a Pinecone index and load documents into it.
 
     Args:
         index_name (str): Name of the Pinecone index.
@@ -152,6 +147,7 @@ def get_pinecone_db(index_name, embeddings, pdf_dir):
         return PC.from_existing_index(index_name, embeddings)
 
 
+@timing_decorator
 def setup_retriever(vectorstore):
     """
     Set up a SelfQueryRetriever with a specified vector store.
@@ -175,6 +171,7 @@ def setup_retriever(vectorstore):
     )
 
 
+@timing_decorator
 def generate_prompt(question, context):
     """
     Generate a prompt for querying the HRMS system.
@@ -206,6 +203,7 @@ def generate_prompt(question, context):
         """
 
 
+@timing_decorator
 def answer_retriever(retriever, question):
     """
     Retrieve an answer from the retriever based on the user's question.
@@ -224,42 +222,32 @@ def answer_retriever(retriever, question):
         return None
 
 
-def run_query(pdf_dir, question):
+@timing_decorator
+def run_llama_index_processing(pdf_dir, question):
     """
-    Run a query on the Pinecone database using LangChain.
+    Run the LlamaIndex processing pipeline, which includes loading documents, creating embeddings,
+    and retrieving answers to the user's question.
 
     Args:
-        pdf_dir (str): Directory with PDF documents.
+        pdf_dir (str): The directory containing PDF files.
         question (str): The user's question.
 
     Returns:
-        dict or None: The retrieved answer.
+        None
     """
-    env_vars = load_environment_variables()
+    # Load environment variables and check directory
+    load_environment_variables()
     check_directory_exists(pdf_dir)
 
-    model_name = "sentence-transformers/multi-qa-mpnet-base-dot-v1"
+    # Set model and index details
+    model_name = "sentence-transformers/all-mpnet-base-v2"  # Model for embedding
     index_name = "document-embeddings"
     embeddings = HuggingFaceEmbeddings(model_name=model_name)
 
+    # Create embeddings using Pinecone and load the documents
     pinecone_db = get_pinecone_db(index_name, embeddings, pdf_dir)
-    retriever = setup_retriever(pinecone_db)
 
-    answer_dict = answer_retriever(retriever, question)
-    return answer_dict
-
-
-def run_llama_index_processing(pdf_dir, question):
-    """
-    Process documents using LlamaIndex and generate a response to the user's question.
-
-    Args:
-        pdf_dir (str): Directory containing PDF documents.
-        question (str): The user's question.
-
-    Returns:
-        None: Prints the response or an error message.
-    """
+    # Process documents using LlamaIndex with the same Pinecone embeddings
     documents = SimpleDirectoryReader(pdf_dir).load_data()
     if not documents:
         print("No documents found in the directory.")
@@ -272,14 +260,23 @@ def run_llama_index_processing(pdf_dir, question):
     index = GPTVectorStoreIndex.from_documents(documents, service_context=service_context)
     query_engine = index.as_query_engine()
 
-    context = "\n".join([doc.page_content for doc in documents if hasattr(doc, 'page_content')])
-    prompt = generate_prompt(question, context)
+    # Perform the query and manually collect source references
+    response = query_engine.query(question)
 
-    response = query_engine.query(prompt)
     if response:
-        print("LlamaIndex response:", response.response)
+        # Build the response with manually highlighted sources
+        response_text = response.response.strip()
+        retrieved_docs = response.source_nodes  # Accessing source nodes
+
+        # Collect unique sources
+        unique_sources = {doc.node.extra_info["file_name"] for doc in retrieved_docs if "file_name" in doc.node.extra_info}
+
+        # Format source references
+        source_references = "\n".join(f"(Source: {source})" for source in unique_sources)
+        full_response = f"{response_text}\n\n{source_references}"
+        print("LlamaIndex response with sources:", full_response)
     else:
-        print("No response from LlamaIndex.")
+        print("No relevant documents were found for your query.")
 
 
 def main():
@@ -289,8 +286,7 @@ def main():
     Runs queries on the Pinecone database and performs additional processing with LlamaIndex.
     """
     pdf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pdf")
-    question = "what is policy of vacation?"
-
+    question = "what are ownership of assets?"
 
     run_llama_index_processing(pdf_dir, question)
 
